@@ -1,2 +1,4 @@
 import { getAds } from './data.js';
-console.log(getAds());
+import { renderAds } from './render.js';
+const ads = getAds();
+renderAds(ads[0]);

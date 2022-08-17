@@ -49,12 +49,18 @@ const PHOTOS = [
   'https://assets.htmlacademy.ru/content/intensive/javascript-1/keksobooking/claire-rendall-b6kAwr1i0Iw.jpg'
 ];
 
-const AUTHORS = getArray(createAuthor,10);
+const COUNT_AUTHORS = 10;
+const AUTHORS = getArray(createAuthor,COUNT_AUTHORS);
+const LAT_MIN = 35.65000;
+const LAT_MAX = 35.70000;
+const LNG_MIN = 139.70000;
+const LNG_MAX = 139.80000;
+const COUNT_ADS = 10;
 
 //Функция строитель для автора
 function createAuthor () {
-  let num = getRandomNumber(1,10,0);
-  if (num < 10) {
+  let num = getRandomNumber(1,COUNT_AUTHORS,0);
+  if (num < COUNT_AUTHORS) {
       num = '0' + num;
   }
   return `img/avatars/user${ num }.png`
@@ -74,16 +80,18 @@ function getFeature () {
 function getPhoto () {
   return getRandomElem(PHOTOS);
 }
+
 //Функция строитель для локации
 function createLocation () {
   return {
-      lat: getRandomNumber(35.65000,35.70000,5),
-      lng: getRandomNumber(139.70000,139.80000,5)
+      lat: getRandomNumber(LAT_MIN,LAT_MAX,5),
+      lng: getRandomNumber(LNG_MIN,LNG_MAX,5)
   };
 }
+
 //Создаём массив из объектов локации
 function createLocationArr () {
-  return Array.from({length:10},createLocation)
+  return Array.from({length:COUNT_ADS},createLocation)
 }
 //Закрепляем массив локаций для дальнейшего перебора
 const locationObj = createLocationArr();
@@ -91,7 +99,7 @@ const locationObj = createLocationArr();
 function getOffer () {
   return {
       title: getRandomElem(TITLES),
-      addres: locationObj[0]["lat"] + ", " + locationObj[0]["lng"],
+      address: locationObj[0]["lat"] + ", " + locationObj[0]["lng"],
       price:getRandomNumber(10000,100000,0),
       type: getRandomElem(TYPES),
       rooms: getRandomNumber(1,8,0),
@@ -114,7 +122,7 @@ function createAd () {
 
 function getAds () {
   let arrayAds = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < COUNT_ADS; i++) {
   arrayAds.push(createAd());
   locationObj.shift();
   }
