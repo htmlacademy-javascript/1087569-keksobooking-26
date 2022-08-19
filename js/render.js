@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 function renderAds (ads) {
   const templateAd = document.querySelector('#card').content.querySelector('.popup');
   const containerAds = document.querySelector('#map-canvas');
@@ -58,6 +59,7 @@ function renderAds (ads) {
   adItem.querySelector('.popup__avatar').src = ads.author.avatar;
   fragment.appendChild(adItem);
   containerAds.appendChild(fragment);
+  checkViewElem ();
   function getFeatures () {
     const features = ads.offer.features;
     const containerFeatures = adItem.querySelector('.popup__features');
@@ -77,6 +79,30 @@ function renderAds (ads) {
       containerPhotos.appendChild(templatePhoto);
     }
     containerPhotos.querySelectorAll('img')[0].remove();
+  }
+  function checkViewElem () {
+    const textElements= [
+      adItem.querySelector('.popup__title'),
+      adItem.querySelector('.popup__text--address'),
+      adItem.querySelector('.popup__text--price'),
+      typePlace,
+      roomsGuests,
+      adItem.querySelector('.popup__text--time'),
+      adItem.querySelector('.popup__description')
+    ];
+    const images = containerAds.querySelectorAll('img');
+    const features = containerAds.querySelector('ul');
+    textElements.forEach((elem) => {
+      if (elem.textContent === undefined || elem.textContent === null || elem.textContent === '') {
+        elem.style.display = 'none';
+      }
+    });
+    images.forEach((elem) => {
+      elem.onerror = () => elem.style.display = 'none';
+    });
+    if (features.children.length < 1) {
+      features.style.display = 'none';
+    }
   }
 }
 
