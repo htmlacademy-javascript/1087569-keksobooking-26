@@ -61,15 +61,15 @@ const COUNT_ADS = 10;
 function createAuthor () {
   let num = getRandomNumber(1,COUNT_AUTHORS,0);
   if (num < COUNT_AUTHORS) {
-      num = '0' + num;
+    num = `0${num}`;
   }
-  return `img/avatars/user${ num }.png`
+  return `img/avatars/user${ num }.png`;
 }
 
 //Функция строитель для автора
 function getAuthor () {
   return {
-      avatar: getRandomElem(AUTHORS)
+    avatar: getRandomElem(AUTHORS)
   };
 }
 
@@ -84,47 +84,47 @@ function getPhoto () {
 //Функция строитель для локации
 function createLocation () {
   return {
-      lat: getRandomNumber(LAT_MIN,LAT_MAX,5),
-      lng: getRandomNumber(LNG_MIN,LNG_MAX,5)
+    lat: getRandomNumber(LAT_MIN,LAT_MAX,5),
+    lng: getRandomNumber(LNG_MIN,LNG_MAX,5)
   };
 }
 
 //Создаём массив из объектов локации
 function createLocationArr () {
-  return Array.from({length:COUNT_ADS},createLocation)
+  return Array.from({length:COUNT_ADS},createLocation);
 }
 //Закрепляем массив локаций для дальнейшего перебора
 const locationObj = createLocationArr();
 
 function getOffer () {
   return {
-      title: getRandomElem(TITLES),
-      address: locationObj[0]["lat"] + ", " + locationObj[0]["lng"],
-      price:getRandomNumber(10000,100000,0),
-      type: getRandomElem(TYPES),
-      rooms: getRandomNumber(1,8,0),
-      guests: getRandomNumber(1,20,0),
-      checkin: getRandomElem(TIMES),
-      checkout: getRandomElem(TIMES),
-      features: getArray(getFeature, getRandomNumber(1,FEATURES.length,0)),
-      description: getRandomElem(DESCRIPTIONS),
-      photos: getArray(getPhoto,getRandomNumber(1,PHOTOS.length,0))
+    title: getRandomElem(TITLES),
+    address: `${locationObj[0]['lat']}, ${locationObj[0]['lng']}`,
+    price:getRandomNumber(10000,100000,0),
+    type: getRandomElem(TYPES),
+    rooms: getRandomNumber(1,8,0),
+    guests: getRandomNumber(1,20,0),
+    checkin: getRandomElem(TIMES),
+    checkout: getRandomElem(TIMES),
+    features: getArray(getFeature, getRandomNumber(1,FEATURES.length,0)),
+    description: getRandomElem(DESCRIPTIONS),
+    photos: getArray(getPhoto,getRandomNumber(1,PHOTOS.length,0))
   };
 }
 
 function createAd () {
   return {
-      author: getAuthor(),
-      offer: getOffer(),
-      location: locationObj[0]
+    author: getAuthor(),
+    offer: getOffer(),
+    location: locationObj[0]
   };
 }
 
 function getAds () {
   let arrayAds = [];
   for (let i = 0; i < COUNT_ADS; i++) {
-  arrayAds.push(createAd());
-  locationObj.shift();
+    arrayAds.push(createAd());
+    locationObj.shift();
   }
   return arrayAds;
 }
