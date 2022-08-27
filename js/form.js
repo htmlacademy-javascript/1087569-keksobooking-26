@@ -3,6 +3,7 @@ const fieldsetsForm = form.querySelectorAll('fieldset'); //Оболочки дл
 const mapFiltersForm = document.querySelector('.map__filters');
 const selectArrOfMap = mapFiltersForm.querySelectorAll('select'); //Коллекция селектов карты(фильтры)
 const fieldsetsMap = mapFiltersForm.querySelector('fieldset');
+//Функция отключения активного состояния страницы
 function createInactiveCondition () {
   form.classList.add('ad-form--disabled');
   fieldsetsForm.forEach((fieldset) => {
@@ -14,7 +15,7 @@ function createInactiveCondition () {
   });
   fieldsetsMap.setAttribute('disabled', 'disabled');
 }
-
+//Функция включения активного состояния страницы
 function createActiveCondition () {
   form.classList.remove('ad-form--disabled');
   fieldsetsForm.forEach((fieldset) => {
@@ -27,6 +28,7 @@ function createActiveCondition () {
   fieldsetsMap.removeAttribute('disabled');
 }
 
+//Валидация формы
 const pristine = new Pristine(form, {
   classTo: 'ad-form__element',
   errorTextParent: 'ad-form__element',
@@ -34,11 +36,18 @@ const pristine = new Pristine(form, {
 });
 
 const pristineRoomsGuests = new Pristine (form, {
-  classTo: 'rooms_guests',
-  errorTextParent: 'rooms_guests',
+  classTo: 'ad-form__element',
+  errorTextParent: 'ad-form__element',
   errorTextClass: 'error-text'
 });
 
+const pristinePlacePrice = new Pristine (form, {
+  classTo: 'ad-form__element',
+  errorTextParent: 'ad-form__element',
+  errorTextClass: 'error-text'
+});
+
+//Кастомная валидация кол-ва комнат и гостей
 const countRooms = form.querySelector('[name="rooms"]'); // Первый селект
 const countGuests = form.querySelector('[name="capacity"]'); // Второй селект
 const roomsGuestsOption = {
@@ -66,11 +75,68 @@ function getRoomsGuestsErrorMessage () {
 }
 
 pristineRoomsGuests.addValidator(countRooms, validateRoomsGuests, getRoomsGuestsErrorMessage);
-pristineRoomsGuests.addValidator(countGuests, validateRoomsGuests, getRoomsGuestsErrorMessage);
+pristineRoomsGuests.addValidator(countGuests, validateRoomsGuests);
+
+//Кастомная валидация типа жилья и цены за ночь
+const typePlace = form.querySelector('#type');//Тип жилья
+const price = form.querySelector('#price'); //Цена за ночь
+price.setAttribute('min', 1000);//Задаём значение атрибута min по умолчанию для корректной работы pristine
+
+function validatePlacePrice () {
+  //Слушатель отражающий зависимость типа жилья и минимальной цены
+  typePlace.addEventListener('change', changePrice);
+  function changePrice () {
+    switch (typePlace.value) {
+      case 'bungalow':
+        price.setAttribute('placeholder', 0);
+        price.setAttribute('min', 0);
+        break;
+      case 'flat':
+        price.setAttribute('placeholder', 1000);
+        price.setAttribute('min', 1000);
+        break;
+      case 'hotel':
+        price.setAttribute('placeholder', 3000);
+        price.setAttribute('min', 3000);
+        break;
+      case 'house':
+        price.setAttribute('placeholder', 5000);
+        price.setAttribute('min', 5000);
+        break;
+      case 'palace':
+        price.setAttribute('placeholder', 10000);
+        price.setAttribute('min', 10000);
+        break;
+    }
+  }
+  return price.value >= +price.getAttribute('min');
+}
+
+function getPlacePriceErrorMessage () {
+  return `Мин. цена = ${price.getAttribute('min')}`;
+}
+
+pristinePlacePrice.addValidator(price, validatePlacePrice, getPlacePriceErrorMessage);
+//Синхронизация селектов времени выезда и заезда
+const timeIn = form.querySelector('#timein');
+const timeOut = form.querySelector('#timeout');
+const containerTime = form.querySelector('.ad-form__element--time');
+
+function changeTimeValue (evt) {
+  if (evt.target.getAttribute('id') === 'timein') {
+    timeOut.value = timeIn.value;
+  } else {
+    timeIn.value = timeOut.value;
+  }
+}
+
+containerTime.addEventListener('change', changeTimeValue);
 
 form.addEventListener('submit', (evt) => {
   evt.preventDefault();
   pristine.validate();
   pristineRoomsGuests.validate();
+  pristinePlacePrice.validate();
+
 });
 export { createInactiveCondition, createActiveCondition };
