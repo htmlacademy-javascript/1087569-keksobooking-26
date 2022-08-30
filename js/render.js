@@ -1,7 +1,5 @@
 function renderAds (ads) {
   const templateAd = document.querySelector('#card').content.querySelector('.popup');
-  const containerAds = document.querySelector('#map-canvas');
-  const fragment = document.createDocumentFragment();
   const adItem = templateAd.cloneNode(true);
   const title = adItem.querySelector('.popup__title');
   const address = adItem.querySelector('.popup__text--address');
@@ -82,8 +80,8 @@ function renderAds (ads) {
   if (ads.author.avatar) {
     avatarImg.src = ads.author.avatar;
   } else {hideBlock(avatarImg);}
-  fragment.appendChild(adItem);
-  containerAds.appendChild(fragment);
+  return adItem;
+
   function getFeatures () {
     const features = ads.offer.features;
     containerFeatures.innerHTML = '';

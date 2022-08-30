@@ -139,4 +139,90 @@ form.addEventListener('submit', (evt) => {
   pristinePlacePrice.validate();
 
 });
-export { createInactiveCondition, createActiveCondition };
+
+//Слайдер
+function getSlider () {
+  const sliderElement = form.querySelector('.ad-form__slider');
+  noUiSlider.create (sliderElement, {
+    range: {
+      min: 1000,
+      max: 100000
+    },
+    start: 1000,
+    step: 1,
+    connect: 'lower',
+    format: {
+      to: function (value) {
+        return +value.toFixed(0);
+      },
+      from: function (value) {
+        return parseFloat(value);
+      }
+    }
+  });
+
+  function checkSliderValue () {
+    price.value = sliderElement.noUiSlider.get();
+  }
+
+  sliderElement.noUiSlider.on('update', checkSliderValue);
+
+  function checkPriceValue () {
+    sliderElement.noUiSlider.set(price.value);
+  }
+
+  price.addEventListener('change', checkPriceValue);
+
+  function updateSliderOptions () {
+    switch (typePlace.value) {
+      case 'bungalow':
+        sliderElement.noUiSlider.updateOptions({
+          range: {
+            min: 0,
+            max: 100000
+          },
+          start: 0
+        });
+        break;
+      case 'flat':
+        sliderElement.noUiSlider.updateOptions({
+          range: {
+            min: 1000,
+            max: 100000
+          },
+          start: 1000
+        });
+        break;
+      case 'hotel':
+        sliderElement.noUiSlider.updateOptions({
+          range: {
+            min: 3000,
+            max: 100000
+          },
+          start: 3000
+        });
+        break;
+      case 'house':
+        sliderElement.noUiSlider.updateOptions({
+          range: {
+            min: 5000,
+            max: 100000
+          },
+          start: 5000
+        });
+        break;
+      case 'palace':
+        sliderElement.noUiSlider.updateOptions({
+          range: {
+            min: 10000,
+            max: 100000
+          },
+          start: 10000
+        });
+        break;
+    }
+  }
+
+  typePlace.addEventListener('change', updateSliderOptions);
+}
+export { createInactiveCondition, createActiveCondition, getSlider };

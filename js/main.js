@@ -1,7 +1,8 @@
 import { getAds } from './data.js';
-import { renderAds } from './render.js';
-import { createInactiveCondition, createActiveCondition } from './form.js';
+import { createInactiveCondition, getSlider } from './form.js';
+import { renderMap } from './map.js';
 const ads = getAds();
-renderAds(ads[0]);
+getSlider();
 createInactiveCondition();
-createActiveCondition();
+renderMap(ads);
+
