@@ -68,7 +68,7 @@ function renderAds (ads) {
   if (ads.offer.checkin && ads.offer.checkout) {
     checkInOut.textContent = `Заезд после ${ads.offer.checkin}, выезд до ${ads.offer.checkout}`;
   } else {hideBlock(checkInOut);}
-  if (ads.offer.features.length > 1) {
+  if (ads.offer.features) {
     getFeatures();
   } else {hideBlock(containerFeatures);}
   if (ads.offer.description) {

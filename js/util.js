@@ -28,4 +28,42 @@ function getRandomElem (arr) {
   return arr[getRandomNumber(0,arr.length - 1,0)];
 }
 
-export {getRandomNumber, getArray, getRandomElem};
+//Создаёт контейнер для вывода ошибки
+function showAlert (message) {
+  const ALERT_SHOW_TIME = 5000;
+  const alertContainer = document.createElement('div');
+  alertContainer.style.zIndex = '100';
+  alertContainer.style.position = 'absolute';
+  alertContainer.style.top = '0';
+  alertContainer.style.right = '0';
+  alertContainer.style.padding = '10px 3px';
+  alertContainer.style.fontSize = '18px';
+  alertContainer.style.textAlign = 'center';
+  alertContainer.style.width = '35%';
+  alertContainer.style.backgroundColor = '#ffaa99';
+  alertContainer.style.color = 'white';
+  alertContainer.style.borderRadius = '5px';
+
+  alertContainer.textContent = message;
+
+  document.body.append(alertContainer);
+
+  setTimeout(() => {
+    alertContainer.remove();
+  }, ALERT_SHOW_TIME);
+}
+
+//Удаляет блок по клику в произвольной области
+function clickEvent (block) {
+  block.remove();
+  document.removeEventListener('click', clickEvent);
+}
+
+//Удаляет блок при нажатии Esc
+function EscEvent (evt, block) {
+  if (evt.code === 'Escape') {
+    block.remove();
+  }
+  document.removeEventListener('keydown', EscEvent);
+}
+export {getRandomNumber, getArray, getRandomElem, showAlert, clickEvent, EscEvent};

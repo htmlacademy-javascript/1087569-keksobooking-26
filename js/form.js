@@ -1,8 +1,15 @@
+import { clickEvent, EscEvent } from './util.js';
+import { sendData } from './api.js';
 const form = document.querySelector('.ad-form');
 const fieldsetsForm = form.querySelectorAll('fieldset'); //Оболочки для формы
 const mapFiltersForm = document.querySelector('.map__filters');
 const selectArrOfMap = mapFiltersForm.querySelectorAll('select'); //Коллекция селектов карты(фильтры)
 const fieldsetsMap = mapFiltersForm.querySelector('fieldset');
+const resetButton = form.querySelector('.ad-form__reset');
+const templateSuccessMessage = document.querySelector('#success').content.querySelector('.success');
+const templateAlertMessage = document.querySelector('#error').content.querySelector('.error');
+const errorButton = templateAlertMessage.querySelector('.error__button');
+const submitButton = form.querySelector('.ad-form__submit');
 //Функция отключения активного состояния страницы
 function createInactiveCondition () {
   form.classList.add('ad-form--disabled');
@@ -132,13 +139,64 @@ function changeTimeValue (evt) {
 
 containerTime.addEventListener('change', changeTimeValue);
 
-form.addEventListener('submit', (evt) => {
-  evt.preventDefault();
-  pristine.validate();
-  pristineRoomsGuests.validate();
-  pristinePlacePrice.validate();
+//Отправка и валидация формы
+function setUserFormSubmit () {
+  form.addEventListener('submit', (evt) => {
+    evt.preventDefault();
+    const isValidTitle = pristine.validate();
+    const isValidRoomsGuests = pristineRoomsGuests.validate();
+    const isValidPrice = pristinePlacePrice.validate();
+    if (isValidTitle && isValidRoomsGuests && isValidPrice) {
+      blockSubmitButton ();
+      sendData(
+        resetForms,
+        () => {
+          showSuccessMessage();
+          unblockSubmitButton();
+        },
+        () => {
+          showAlertMessage();
+          unblockSubmitButton();
+        },
+        new FormData(evt.target)
+      );
+    }
+  });
+}
 
-});
+resetButton.addEventListener ('click', resetForms);
+
+function resetForms () {
+  const popup = document.querySelector('.leaflet-popup');
+  if (popup) {
+    popup.remove();
+  }
+  form.reset();
+  mapFiltersForm.reset();
+}
+
+function showSuccessMessage () {
+  document.body.append(templateSuccessMessage);
+  document.addEventListener('click', () => clickEvent(templateSuccessMessage));
+  document.addEventListener('keydown', (evt) => EscEvent(evt, templateSuccessMessage));
+}
+
+function showAlertMessage () {
+  document.body.append(templateAlertMessage);
+  document.addEventListener('click', () => clickEvent(templateAlertMessage));
+  document.addEventListener('keydown', (evt) => EscEvent(evt, templateAlertMessage));
+  errorButton.addEventListener('click', () => clickEvent(templateAlertMessage));
+}
+
+function blockSubmitButton () {
+  submitButton.disabled = true;
+  submitButton.textContent = 'Публикация...';
+}
+
+function unblockSubmitButton () {
+  submitButton.disabled = false;
+  submitButton.textContent = 'Опубликовать';
+}
 
 //Слайдер
 function getSlider () {
@@ -225,4 +283,4 @@ function getSlider () {
 
   typePlace.addEventListener('change', updateSliderOptions);
 }
-export { createInactiveCondition, createActiveCondition, getSlider };
+export { createInactiveCondition, createActiveCondition, getSlider, setUserFormSubmit };
