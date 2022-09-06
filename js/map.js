@@ -89,6 +89,7 @@ function renderMap (ads) {
 
   mapFiltersForm.addEventListener ('change', debounce(() => {
     const houseFeatures = document.querySelectorAll('input[type="checkbox"]:checked');
+    // eslint-disable-next-line prefer-const
     let FeaturesArr = [];
     houseFeatures.forEach((feature) => FeaturesArr.push(feature.value));
     const filterAds = ads.slice().filter((ad) => getFilterAd(ad, FeaturesArr));
