@@ -198,6 +198,56 @@ function unblockSubmitButton () {
   submitButton.textContent = 'Опубликовать';
 }
 
+//Фильтрация меток карты
+const houseType = mapFiltersForm.querySelector('#housing-type');
+const housePrice = mapFiltersForm.querySelector('#housing-price');
+const houseRooms = mapFiltersForm.querySelector('#housing-rooms');
+const houseGuests = mapFiltersForm.querySelector('#housing-guests');
+function getFilterAd (ad, features) {
+  let filterRate = 0;
+  //Тип жилья
+  if (ad.offer.type === houseType.value || houseType.value === 'any') {
+    filterRate += 1;
+  }
+  //Цена
+  switch(housePrice.value) {
+    case 'low':
+      if (ad.offer.price < 10000) {
+        filterRate +=1;
+      }
+      break;
+    case 'middle':
+      if (ad.offer.price >= 10000 && ad.offer.price < 50000) {
+        filterRate += 1;
+      }
+      break;
+    case 'high':
+      if (ad.offer.price >= 50000) {
+        filterRate += 1;
+      }
+      break;
+    default:
+      filterRate += 1;
+  }
+  //Кол-во комнат
+  if (ad.offer.rooms === +houseRooms.value || houseRooms.value === 'any') {
+    filterRate += 1;
+  }
+  //Кол-во гостей
+  if (ad.offer.guests === houseGuests.value || houseGuests.value === 'any') {
+    filterRate += 1;
+  }
+  //Удобства
+  if (ad.offer.features) {
+    //Массив с удобствами, которые отсутствуют в объявлении
+    const withoutFeatures =  features.filter((feature) => !ad.offer.features.includes(feature));
+    if (withoutFeatures.length === 0) {
+      filterRate += 1;
+    }
+  }
+  return filterRate >= 5;
+}
+
 //Слайдер
 function getSlider () {
   const sliderElement = form.querySelector('.ad-form__slider');
@@ -283,4 +333,4 @@ function getSlider () {
 
   typePlace.addEventListener('change', updateSliderOptions);
 }
-export { createInactiveCondition, createActiveCondition, getSlider, setUserFormSubmit };
+export { createInactiveCondition, createActiveCondition, getSlider, setUserFormSubmit, getFilterAd };

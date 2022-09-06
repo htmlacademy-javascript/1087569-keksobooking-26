@@ -1,6 +1,10 @@
-import {  createActiveCondition } from './form.js';
+import { debounce } from './util.js';
+import {  createActiveCondition, getFilterAd } from './form.js';
 import { renderAds } from './render.js';
 
+const mapFiltersForm = document.querySelector('.map__filters');
+const MARKERS_COUNT = 10;
+const RERENDER_DELAY = 500;
 function renderMap (ads) {
   const map = L.map('map-canvas')
     .on('load', createActiveCondition
@@ -65,7 +69,7 @@ function renderMap (ads) {
     iconSize: [40, 40],
     iconAnchor: [20, 40],
   });
-
+  const markerGroup = L.layerGroup().addTo(map);
   function createMarker (ad) {
     const lat = ad['location']['lat'];
     const lng = ad['location']['lng'];
@@ -78,10 +82,19 @@ function renderMap (ads) {
         icon
       });
 
-    marker.addTo(map).bindPopup(renderAds(ad));
+    marker.addTo(markerGroup).bindPopup(renderAds(ad));
   }
 
-  ads.forEach((ad) => createMarker(ad));
+  ads.slice(0, MARKERS_COUNT).forEach((ad) => createMarker(ad));
+
+  mapFiltersForm.addEventListener ('change', debounce(() => {
+    const houseFeatures = document.querySelectorAll('input[type="checkbox"]:checked');
+    let FeaturesArr = [];
+    houseFeatures.forEach((feature) => FeaturesArr.push(feature.value));
+    const filterAds = ads.slice().filter((ad) => getFilterAd(ad, FeaturesArr));
+    markerGroup.clearLayers();
+    filterAds.slice(0, MARKERS_COUNT).forEach((ad) => createMarker(ad));
+  }), RERENDER_DELAY);
 }
 
 export { renderMap };
