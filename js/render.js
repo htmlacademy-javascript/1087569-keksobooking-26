@@ -11,6 +11,8 @@ function renderAds (ads) {
   const description = adItem.querySelector('.popup__description');
   const containerPhotos = adItem.querySelector('.popup__photos');
   const avatarImg = adItem.querySelector('.popup__avatar');
+  const features = ads.offer.features;
+  const photos = ads.offer.photos;
   if (ads.offer.title) {
     title.textContent = ads.offer.title;
   } else {hideBlock(title);}
@@ -83,7 +85,6 @@ function renderAds (ads) {
   return adItem;
 
   function getFeatures () {
-    const features = ads.offer.features;
     containerFeatures.innerHTML = '';
     for (let i = 0; i < features.length; i++) {
       const featureElem = document.createElement('li');
@@ -92,7 +93,6 @@ function renderAds (ads) {
     }
   }
   function getPhotos () {
-    const photos = ads.offer.photos;
     for (let i = 0; i < photos.length; i++) {
       const templatePhoto = containerPhotos.querySelector('.popup__photo').cloneNode(true);
       templatePhoto.src = photos[i];

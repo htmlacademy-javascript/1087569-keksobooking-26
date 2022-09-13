@@ -3,14 +3,42 @@ import {  createActiveCondition, getFilterAd } from './form.js';
 import { renderAds } from './render.js';
 
 const mapFiltersForm = document.querySelector('.map__filters');
+const address = document.querySelector('#address');
+const resetButton = document.querySelector('.ad-form__reset');
 const MARKERS_COUNT = 10;
 const RERENDER_DELAY = 500;
+const TOKIO_LAT = 35.78912;
+const TOKIO_LNG = 139.80931;
+
+const mainMarkerIcon = L.icon({
+  iconUrl: './img/main-pin.svg',
+  iconSize: [52, 52],
+  iconAnchor: [26, 52],
+});
+
+const mainMarker =  L.marker(
+  {
+    lat: TOKIO_LAT,
+    lng: TOKIO_LNG
+  },
+  {
+    draggable: true,
+    icon: mainMarkerIcon
+  }
+);
+
+const icon = L.icon({
+  iconUrl: './img/pin.svg',
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+});
+
 function renderMap (ads) {
   const map = L.map('map-canvas')
     .on('load', createActiveCondition
     ).setView({
-      lat: 35.78912,
-      lng: 139.80931
+      lat: TOKIO_LAT,
+      lng: TOKIO_LNG
     }, 11);
 
   L.tileLayer(
@@ -20,28 +48,7 @@ function renderMap (ads) {
     },
   ).addTo(map);
 
-  const mainMarkerIcon = L.icon({
-    iconUrl: './img/main-pin.svg',
-    iconSize: [52, 52],
-    iconAnchor: [26, 52],
-  });
-
-  const mainMarker =  L.marker(
-    {
-      lat: 35.78912,
-      lng: 139.80931
-    },
-    {
-      draggable: true,
-      icon: mainMarkerIcon
-    }
-  );
-
   mainMarker.addTo(map);
-
-  //Задаём значение адреса по умолчанию
-  const address = document.querySelector('#address');
-
   //Зависимость главной метки со значением адреса
   function getAddress (evt) {
     address.value = `${evt.target.getLatLng()['lat'].toFixed(5)}, ${evt.target.getLatLng()['lng'].toFixed(5)}`;
@@ -49,26 +56,20 @@ function renderMap (ads) {
 
   mainMarker.on('moveend', getAddress);
 
-  const resetButton = document.querySelector('.ad-form__reset');
   function returnDefaultOptions () {
     mainMarker.setLatLng({
-      lat: 35.78912,
-      lng: 139.80931
+      lat: TOKIO_LAT,
+      lng: TOKIO_LNG
     });
 
     map.setView({
-      lat: 35.78912,
-      lng: 139.80931
+      lat: TOKIO_LAT,
+      lng: TOKIO_LNG
     }, 11);
   }
 
   resetButton.addEventListener('click', returnDefaultOptions);
 
-  const icon = L.icon({
-    iconUrl: './img/pin.svg',
-    iconSize: [40, 40],
-    iconAnchor: [20, 40],
-  });
   const markerGroup = L.layerGroup().addTo(map);
   function createMarker (ad) {
     const lat = ad['location']['lat'];

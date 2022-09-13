@@ -10,31 +10,6 @@ const templateSuccessMessage = document.querySelector('#success').content.queryS
 const templateAlertMessage = document.querySelector('#error').content.querySelector('.error');
 const errorButton = templateAlertMessage.querySelector('.error__button');
 const submitButton = form.querySelector('.ad-form__submit');
-//Функция отключения активного состояния страницы
-function createInactiveCondition () {
-  form.classList.add('ad-form--disabled');
-  fieldsetsForm.forEach((fieldset) => {
-    fieldset.setAttribute('disabled', 'disabled');
-  });
-  mapFiltersForm.classList.add('map__filters--disabled');
-  selectArrOfMap.forEach((select) => {
-    select.setAttribute('disabled', 'disabled');
-  });
-  fieldsetsMap.setAttribute('disabled', 'disabled');
-}
-//Функция включения активного состояния страницы
-function createActiveCondition () {
-  form.classList.remove('ad-form--disabled');
-  fieldsetsForm.forEach((fieldset) => {
-    fieldset.removeAttribute('disabled');
-  });
-  mapFiltersForm.classList.remove('map__filters--disabled');
-  selectArrOfMap.forEach((select) => {
-    select.removeAttribute('disabled');
-  });
-  fieldsetsMap.removeAttribute('disabled');
-}
-
 //Валидация формы
 const pristine = new Pristine(form, {
   classTo: 'ad-form__element',
@@ -64,6 +39,44 @@ const roomsGuestsOption = {
   '100': ['0']
 }; // Условие взаимосвязи селектов (1 комната - 1 гость, 2 комнаты для 2 и для 1 и т.д.)
 
+const typePlace = form.querySelector('#type');//Тип жилья
+const price = form.querySelector('#price'); //Цена за ночь
+const timeIn = form.querySelector('#timein');
+const timeOut = form.querySelector('#timeout');
+const containerTime = form.querySelector('.ad-form__element--time');
+const houseType = mapFiltersForm.querySelector('#housing-type');
+const housePrice = mapFiltersForm.querySelector('#housing-price');
+const houseRooms = mapFiltersForm.querySelector('#housing-rooms');
+const houseGuests = mapFiltersForm.querySelector('#housing-guests');
+const popup = document.querySelector('.leaflet-popup');
+const sliderElement = form.querySelector('.ad-form__slider');
+const SUCCESS_RATE = 5;
+const DEFAULT_PRICE = 1000;
+//Функция отключения активного состояния страницы
+function createInactiveCondition () {
+  form.classList.add('ad-form--disabled');
+  fieldsetsForm.forEach((fieldset) => {
+    fieldset.setAttribute('disabled', 'disabled');
+  });
+  mapFiltersForm.classList.add('map__filters--disabled');
+  selectArrOfMap.forEach((select) => {
+    select.setAttribute('disabled', 'disabled');
+  });
+  fieldsetsMap.setAttribute('disabled', 'disabled');
+}
+//Функция включения активного состояния страницы
+function createActiveCondition () {
+  form.classList.remove('ad-form--disabled');
+  fieldsetsForm.forEach((fieldset) => {
+    fieldset.removeAttribute('disabled');
+  });
+  mapFiltersForm.classList.remove('map__filters--disabled');
+  selectArrOfMap.forEach((select) => {
+    select.removeAttribute('disabled');
+  });
+  fieldsetsMap.removeAttribute('disabled');
+}
+
 function validateRoomsGuests () {
   return roomsGuestsOption[countRooms.value].includes(countGuests.value); // Проверяем условие
 }
@@ -85,9 +98,7 @@ pristineRoomsGuests.addValidator(countRooms, validateRoomsGuests, getRoomsGuests
 pristineRoomsGuests.addValidator(countGuests, validateRoomsGuests);
 
 //Кастомная валидация типа жилья и цены за ночь
-const typePlace = form.querySelector('#type');//Тип жилья
-const price = form.querySelector('#price'); //Цена за ночь
-price.setAttribute('min', 1000);//Задаём значение атрибута min по умолчанию для корректной работы pristine
+price.setAttribute('min', DEFAULT_PRICE);//Задаём значение атрибута min по умолчанию для корректной работы pristine
 
 function validatePlacePrice () {
   //Слушатель отражающий зависимость типа жилья и минимальной цены
@@ -124,11 +135,8 @@ function getPlacePriceErrorMessage () {
 }
 
 pristinePlacePrice.addValidator(price, validatePlacePrice, getPlacePriceErrorMessage);
-//Синхронизация селектов времени выезда и заезда
-const timeIn = form.querySelector('#timein');
-const timeOut = form.querySelector('#timeout');
-const containerTime = form.querySelector('.ad-form__element--time');
 
+//Синхронизация селектов времени выезда и заезда
 function changeTimeValue (evt) {
   if (evt.target.getAttribute('id') === 'timein') {
     timeOut.value = timeIn.value;
@@ -167,7 +175,6 @@ function setUserFormSubmit () {
 resetButton.addEventListener ('click', resetForms);
 
 function resetForms () {
-  const popup = document.querySelector('.leaflet-popup');
   if (popup) {
     popup.remove();
   }
@@ -199,10 +206,6 @@ function unblockSubmitButton () {
 }
 
 //Фильтрация меток карты
-const houseType = mapFiltersForm.querySelector('#housing-type');
-const housePrice = mapFiltersForm.querySelector('#housing-price');
-const houseRooms = mapFiltersForm.querySelector('#housing-rooms');
-const houseGuests = mapFiltersForm.querySelector('#housing-guests');
 function getFilterAd (ad, features) {
   let filterRate = 0;
   //Тип жилья
@@ -234,7 +237,7 @@ function getFilterAd (ad, features) {
     filterRate += 1;
   }
   //Кол-во гостей
-  if (ad.offer.guests === houseGuests.value || houseGuests.value === 'any') {
+  if (ad.offer.guests === +houseGuests.value || houseGuests.value === 'any') {
     filterRate += 1;
   }
   //Удобства
@@ -245,12 +248,11 @@ function getFilterAd (ad, features) {
       filterRate += 1;
     }
   }
-  return filterRate >= 5;
+  return filterRate >= SUCCESS_RATE;
 }
 
 //Слайдер
 function getSlider () {
-  const sliderElement = form.querySelector('.ad-form__slider');
   noUiSlider.create (sliderElement, {
     range: {
       min: 1000,

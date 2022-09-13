@@ -13,6 +13,7 @@ function getRandomNumber(min, max, exp) {
 
 //Создаёт массив используя функцию строитель и необходимую длину массива
 function getArray (createFunction, arrayLength) {
+  // eslint-disable-next-line prefer-const
   let arr = [];
   arr.push(createFunction());
   while (arr.length < arrayLength) {
