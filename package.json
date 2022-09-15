@@ -25,6 +25,6 @@
     "npm": "8.x"
   },
   "dependencies": {
-    "pristinejs": "^0.1.9"
+    "pristinejs": "0.1.9"
   }
 }
