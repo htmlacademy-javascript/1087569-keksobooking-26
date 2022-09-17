@@ -33,70 +33,75 @@ const icon = L.icon({
   iconAnchor: [20, 40],
 });
 
-function renderMap (ads) {
-  const map = L.map('map-canvas')
-    .on('load', createActiveCondition
-    ).setView({
-      lat: TOKIO_LAT,
-      lng: TOKIO_LNG
-    }, 11);
+const map = L.map('map-canvas')
+  .setView({
+    lat: TOKIO_LAT,
+    lng: TOKIO_LNG
+  }, 11);
 
+const markerGroup = L.layerGroup().addTo(map);
+
+let offers = [];
+
+function returnDefaultOptionsHandler () {
+  mainMarker.setLatLng({
+    lat: TOKIO_LAT,
+    lng: TOKIO_LNG
+  });
+
+  map.setView({
+    lat: TOKIO_LAT,
+    lng: TOKIO_LNG
+  }, 11);
+  markerGroup.clearLayers();
+  renderLayer(offers);
+}
+
+function createMarker (ad) {
+  const lat = ad['location']['lat'];
+  const lng = ad['location']['lng'];
+  const marker = L.marker(
+    {
+      lat,
+      lng
+    },
+    {
+      icon
+    });
+
+  marker.addTo(markerGroup).bindPopup(renderAds(ad));
+}
+
+function renderLayer (dataOffers) {
+  dataOffers.slice(0, MARKERS_COUNT).forEach((offer) => createMarker(offer));
+}
+
+function renderMap (ads) {
   L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     },
   ).addTo(map);
-
+  offers = ads;
+  createActiveCondition();
   mainMarker.addTo(map);
   //Зависимость главной метки со значением адреса
   function getAddress (evt) {
     address.value = `${evt.target.getLatLng()['lat'].toFixed(5)}, ${evt.target.getLatLng()['lng'].toFixed(5)}`;
   }
-
   mainMarker.on('moveend', getAddress);
-
-  function returnDefaultOptions () {
-    mainMarker.setLatLng({
-      lat: TOKIO_LAT,
-      lng: TOKIO_LNG
-    });
-
-    map.setView({
-      lat: TOKIO_LAT,
-      lng: TOKIO_LNG
-    }, 11);
-  }
-
-  resetButton.addEventListener('click', returnDefaultOptions);
-
-  const markerGroup = L.layerGroup().addTo(map);
-  function createMarker (ad) {
-    const lat = ad['location']['lat'];
-    const lng = ad['location']['lng'];
-    const marker = L.marker(
-      {
-        lat,
-        lng
-      },
-      {
-        icon
-      });
-
-    marker.addTo(markerGroup).bindPopup(renderAds(ad));
-  }
-
-  ads.slice(0, MARKERS_COUNT).forEach((ad) => createMarker(ad));
+  resetButton.addEventListener('click', returnDefaultOptionsHandler);
+  renderLayer (ads);
 
   mapFiltersForm.addEventListener ('change', debounce(() => {
     const houseFeatures = document.querySelectorAll('input[type="checkbox"]:checked');
-    // eslint-disable-next-line prefer-const
-    let FeaturesArr = [];
-    houseFeatures.forEach((feature) => FeaturesArr.push(feature.value));
-    const filterAds = ads.slice().filter((ad) => getFilterAd(ad, FeaturesArr));
+    const featuresArr = [];
+    houseFeatures.forEach((feature) => featuresArr.push(feature.value));
+    const filterAds = ads.slice().filter((ad) => getFilterAd(ad, featuresArr));
     markerGroup.clearLayers();
     filterAds.slice(0, MARKERS_COUNT).forEach((ad) => createMarker(ad));
   }), RERENDER_DELAY);
 }
 
-export { renderMap };
+export { renderMap, returnDefaultOptionsHandler };
