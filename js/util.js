@@ -1,3 +1,4 @@
+const ALERT_SHOW_TIME = 5000;
 function getRandomNumber(min, max, exp) {
   if (exp === undefined) {
     throw new Error ('Введите количество знаков после запятой');
@@ -13,8 +14,7 @@ function getRandomNumber(min, max, exp) {
 
 //Создаёт массив используя функцию строитель и необходимую длину массива
 function getArray (createFunction, arrayLength) {
-  // eslint-disable-next-line prefer-const
-  let arr = [];
+  const arr = [];
   arr.push(createFunction());
   while (arr.length < arrayLength) {
     const elem = createFunction();
@@ -31,7 +31,6 @@ function getRandomElem (arr) {
 
 //Создаёт контейнер для вывода ошибки
 function showAlert (message) {
-  const ALERT_SHOW_TIME = 5000;
   const alertContainer = document.createElement('div');
   alertContainer.style.zIndex = '100';
   alertContainer.style.position = 'absolute';
@@ -57,15 +56,13 @@ function showAlert (message) {
 //Удаляет блок по клику в произвольной области
 function clickEvent (block) {
   block.remove();
-  document.removeEventListener('click', clickEvent);
 }
 
 //Удаляет блок при нажатии Esc
-function EscEvent (evt, block) {
+function escEvent (evt, block) {
   if (evt.code === 'Escape') {
     block.remove();
   }
-  document.removeEventListener('keydown', EscEvent);
 }
 
 function debounce (callback, timeoutDelay = 500) {
@@ -85,4 +82,4 @@ function debounce (callback, timeoutDelay = 500) {
     // пока действие совершается чаще, чем переданная задержка timeoutDelay
   };
 }
-export {getRandomNumber, getArray, getRandomElem, showAlert, clickEvent, EscEvent, debounce};
+export {getRandomNumber, getArray, getRandomElem, showAlert, clickEvent, escEvent, debounce};

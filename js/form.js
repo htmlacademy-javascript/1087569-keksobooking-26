@@ -1,5 +1,7 @@
-import { clickEvent, EscEvent } from './util.js';
+import { clickEvent, escEvent } from './util.js';
 import { sendData } from './api.js';
+import { avatarContainer, photoForAdContainer } from './preview-photos.js';
+import { returnDefaultOptionsHandler } from './map.js';
 const form = document.querySelector('.ad-form');
 const fieldsetsForm = form.querySelectorAll('fieldset'); //Оболочки для формы
 const mapFiltersForm = document.querySelector('.map__filters');
@@ -48,10 +50,27 @@ const houseType = mapFiltersForm.querySelector('#housing-type');
 const housePrice = mapFiltersForm.querySelector('#housing-price');
 const houseRooms = mapFiltersForm.querySelector('#housing-rooms');
 const houseGuests = mapFiltersForm.querySelector('#housing-guests');
-const popup = document.querySelector('.leaflet-popup');
 const sliderElement = form.querySelector('.ad-form__slider');
 const SUCCESS_RATE = 5;
 const DEFAULT_PRICE = 1000;
+const BUNGALOW_MIN_PRICE = 0;
+const FLAT_MIN_PRICE = 1000;
+const HOTEL_MIN_PRICE = 3000;
+const HOUSE_MIN_PRICE = 5000;
+const PALACE_MIN_PRICE = 10000;
+const MAX_PRICE = 100000;
+const bungalow = 'bungalow';
+const flat = 'flat';
+const hotel = 'hotel';
+const house = 'house';
+const palace = 'palace';
+const LOW_FILTER_PRICE = 'low';
+const MIDDLE_FILTER_PRICE = 'middle';
+const HIGH_FILTER_PRICE = 'high';
+const LOW_FILTER_PRICE_MAX = 10000;
+const MIDDLE_FILTER_PRICE_MIN = 10000;
+const MIDDLE_FILTER_PRICE_MAX = 50000;
+const HIGH_FILTER_PRICE_MIN = 50000;
 //Функция отключения активного состояния страницы
 function createInactiveCondition () {
   form.classList.add('ad-form--disabled');
@@ -102,28 +121,28 @@ price.setAttribute('min', DEFAULT_PRICE);//Задаём значение атр�
 
 function validatePlacePrice () {
   //Слушатель отражающий зависимость типа жилья и минимальной цены
-  typePlace.addEventListener('change', changePrice);
-  function changePrice () {
+  typePlace.addEventListener('change', changePriceHandler);
+  function changePriceHandler () {
     switch (typePlace.value) {
-      case 'bungalow':
-        price.setAttribute('placeholder', 0);
-        price.setAttribute('min', 0);
+      case bungalow:
+        price.setAttribute('placeholder', BUNGALOW_MIN_PRICE);
+        price.setAttribute('min', BUNGALOW_MIN_PRICE);
         break;
-      case 'flat':
-        price.setAttribute('placeholder', 1000);
-        price.setAttribute('min', 1000);
+      case flat:
+        price.setAttribute('placeholder', FLAT_MIN_PRICE);
+        price.setAttribute('min', FLAT_MIN_PRICE);
         break;
-      case 'hotel':
-        price.setAttribute('placeholder', 3000);
-        price.setAttribute('min', 3000);
+      case hotel:
+        price.setAttribute('placeholder', HOTEL_MIN_PRICE);
+        price.setAttribute('min', HOTEL_MIN_PRICE);
         break;
-      case 'house':
-        price.setAttribute('placeholder', 5000);
-        price.setAttribute('min', 5000);
+      case house:
+        price.setAttribute('placeholder', HOUSE_MIN_PRICE);
+        price.setAttribute('min', HOUSE_MIN_PRICE);
         break;
-      case 'palace':
-        price.setAttribute('placeholder', 10000);
-        price.setAttribute('min', 10000);
+      case palace:
+        price.setAttribute('placeholder', PALACE_MIN_PRICE);
+        price.setAttribute('min', PALACE_MIN_PRICE);
         break;
     }
   }
@@ -137,7 +156,7 @@ function getPlacePriceErrorMessage () {
 pristinePlacePrice.addValidator(price, validatePlacePrice, getPlacePriceErrorMessage);
 
 //Синхронизация селектов времени выезда и заезда
-function changeTimeValue (evt) {
+function changeTimeValueHandler (evt) {
   if (evt.target.getAttribute('id') === 'timein') {
     timeOut.value = timeIn.value;
   } else {
@@ -145,7 +164,7 @@ function changeTimeValue (evt) {
   }
 }
 
-containerTime.addEventListener('change', changeTimeValue);
+containerTime.addEventListener('change', changeTimeValueHandler);
 
 //Отправка и валидация формы
 function setUserFormSubmit () {
@@ -157,7 +176,7 @@ function setUserFormSubmit () {
     if (isValidTitle && isValidRoomsGuests && isValidPrice) {
       blockSubmitButton ();
       sendData(
-        resetForms,
+        resetFormsHandler,
         () => {
           showSuccessMessage();
           unblockSubmitButton();
@@ -172,27 +191,34 @@ function setUserFormSubmit () {
   });
 }
 
-resetButton.addEventListener ('click', resetForms);
+resetButton.addEventListener ('click', resetFormsHandler);
 
-function resetForms () {
+function resetFormsHandler () {
+  const popup = document.querySelector('.leaflet-popup');
+  const photoElem = photoForAdContainer.firstChild;
+  returnDefaultOptionsHandler();
   if (popup) {
     popup.remove();
   }
   form.reset();
   mapFiltersForm.reset();
+  avatarContainer.src = 'img/muffin-grey.svg';
+  if (photoElem) {
+    photoElem.remove();
+  }
 }
 
 function showSuccessMessage () {
   document.body.append(templateSuccessMessage);
-  document.addEventListener('click', () => clickEvent(templateSuccessMessage));
-  document.addEventListener('keydown', (evt) => EscEvent(evt, templateSuccessMessage));
+  document.addEventListener('click', () => clickEvent(templateSuccessMessage), {once: true});
+  document.addEventListener('keydown', (evt) => escEvent(evt, templateSuccessMessage), {once: true});
 }
 
 function showAlertMessage () {
   document.body.append(templateAlertMessage);
-  document.addEventListener('click', () => clickEvent(templateAlertMessage));
-  document.addEventListener('keydown', (evt) => EscEvent(evt, templateAlertMessage));
-  errorButton.addEventListener('click', () => clickEvent(templateAlertMessage));
+  document.addEventListener('click', () => clickEvent(templateAlertMessage), {once: true});
+  document.addEventListener('keydown', (evt) => escEvent(evt, templateAlertMessage), {once: true});
+  errorButton.addEventListener('click', () => clickEvent(templateAlertMessage), {once: true});
 }
 
 function blockSubmitButton () {
@@ -214,18 +240,18 @@ function getFilterAd (ad, features) {
   }
   //Цена
   switch(housePrice.value) {
-    case 'low':
-      if (ad.offer.price < 10000) {
+    case LOW_FILTER_PRICE:
+      if (ad.offer.price < LOW_FILTER_PRICE_MAX) {
         filterRate +=1;
       }
       break;
-    case 'middle':
-      if (ad.offer.price >= 10000 && ad.offer.price < 50000) {
+    case MIDDLE_FILTER_PRICE:
+      if (ad.offer.price >= MIDDLE_FILTER_PRICE_MIN && ad.offer.price < MIDDLE_FILTER_PRICE_MAX) {
         filterRate += 1;
       }
       break;
-    case 'high':
-      if (ad.offer.price >= 50000) {
+    case HIGH_FILTER_PRICE:
+      if (ad.offer.price >= HIGH_FILTER_PRICE_MIN) {
         filterRate += 1;
       }
       break;
@@ -255,10 +281,10 @@ function getFilterAd (ad, features) {
 function getSlider () {
   noUiSlider.create (sliderElement, {
     range: {
-      min: 1000,
-      max: 100000
+      min: DEFAULT_PRICE,
+      max: MAX_PRICE
     },
-    start: 1000,
+    start: DEFAULT_PRICE,
     step: 1,
     connect: 'lower',
     format: {
@@ -271,63 +297,63 @@ function getSlider () {
     }
   });
 
-  function checkSliderValue () {
+  function checkSliderValueHandler () {
     price.value = sliderElement.noUiSlider.get();
   }
 
-  sliderElement.noUiSlider.on('update', checkSliderValue);
+  sliderElement.noUiSlider.on('update', checkSliderValueHandler);
 
-  function checkPriceValue () {
+  function checkPriceValueHandler () {
     sliderElement.noUiSlider.set(price.value);
   }
 
-  price.addEventListener('change', checkPriceValue);
+  price.addEventListener('change', checkPriceValueHandler);
 
   function updateSliderOptions () {
     switch (typePlace.value) {
-      case 'bungalow':
+      case bungalow:
         sliderElement.noUiSlider.updateOptions({
           range: {
-            min: 0,
-            max: 100000
+            min: BUNGALOW_MIN_PRICE,
+            max: MAX_PRICE
           },
-          start: 0
+          start: BUNGALOW_MIN_PRICE
         });
         break;
-      case 'flat':
+      case flat:
         sliderElement.noUiSlider.updateOptions({
           range: {
-            min: 1000,
-            max: 100000
+            min: FLAT_MIN_PRICE,
+            max: MAX_PRICE
           },
-          start: 1000
+          start: FLAT_MIN_PRICE
         });
         break;
-      case 'hotel':
+      case hotel:
         sliderElement.noUiSlider.updateOptions({
           range: {
-            min: 3000,
-            max: 100000
+            min: HOTEL_MIN_PRICE,
+            max: MAX_PRICE
           },
-          start: 3000
+          start: HOTEL_MIN_PRICE
         });
         break;
-      case 'house':
+      case house:
         sliderElement.noUiSlider.updateOptions({
           range: {
-            min: 5000,
-            max: 100000
+            min: HOUSE_MIN_PRICE,
+            max: MAX_PRICE
           },
-          start: 5000
+          start: HOUSE_MIN_PRICE
         });
         break;
-      case 'palace':
+      case palace:
         sliderElement.noUiSlider.updateOptions({
           range: {
-            min: 10000,
-            max: 100000
+            min: PALACE_MIN_PRICE,
+            max: MAX_PRICE
           },
-          start: 10000
+          start: PALACE_MIN_PRICE
         });
         break;
     }
