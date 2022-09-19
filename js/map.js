@@ -4,7 +4,6 @@ import { renderAds } from './render.js';
 
 const mapFiltersForm = document.querySelector('.map__filters');
 const address = document.querySelector('#address');
-const resetButton = document.querySelector('.ad-form__reset');
 const MARKERS_COUNT = 10;
 const RERENDER_DELAY = 500;
 const TOKIO_LAT = 35.78912;
@@ -43,7 +42,7 @@ const markerGroup = L.layerGroup().addTo(map);
 
 let offers = [];
 
-function returnDefaultOptionsHandler () {
+function mapReturnDefault () {
   mainMarker.setLatLng({
     lat: TOKIO_LAT,
     lng: TOKIO_LNG
@@ -91,7 +90,6 @@ function renderMap (ads) {
     address.value = `${evt.target.getLatLng()['lat'].toFixed(5)}, ${evt.target.getLatLng()['lng'].toFixed(5)}`;
   }
   mainMarker.on('moveend', getAddress);
-  resetButton.addEventListener('click', returnDefaultOptionsHandler);
   renderLayer (ads);
 
   mapFiltersForm.addEventListener ('change', debounce(() => {
@@ -104,4 +102,4 @@ function renderMap (ads) {
   }), RERENDER_DELAY);
 }
 
-export { renderMap, returnDefaultOptionsHandler };
+export { renderMap, mapReturnDefault };

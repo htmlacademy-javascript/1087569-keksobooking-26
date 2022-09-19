@@ -1,3 +1,4 @@
+import { templateSuccessMessage, templateAlertMessage, errorButton } from './form.js';
 const ALERT_SHOW_TIME = 5000;
 function getRandomNumber(min, max, exp) {
   if (exp === undefined) {
@@ -53,16 +54,34 @@ function showAlert (message) {
   }, ALERT_SHOW_TIME);
 }
 
-//Удаляет блок по клику в произвольной области
-function clickEvent (block) {
-  block.remove();
+function successClickHandler () {
+  templateSuccessMessage.remove();
+  document.removeEventListener('click', successClickHandler);
+  document.removeEventListener('keydown', successKeydownHandler);
 }
 
-//Удаляет блок при нажатии Esc
-function escEvent (evt, block) {
+function alertClickHandler () {
+  templateAlertMessage.remove();
+  document.removeEventListener('click', alertClickHandler);
+  document.removeEventListener('keydown', alertKeydownHandler);
+  errorButton.removeEventListener('click', alertClickHandler);
+}
+
+function successKeydownHandler (evt) {
   if (evt.code === 'Escape') {
-    block.remove();
+    templateSuccessMessage.remove();
   }
+  document.removeEventListener('keydown', successKeydownHandler);
+  document.removeEventListener('click', successClickHandler);
+}
+
+function alertKeydownHandler (evt) {
+  if (evt.code === 'Escape') {
+    templateAlertMessage.remove();
+  }
+  document.removeEventListener('keydown', alertKeydownHandler);
+  document.removeEventListener('click', alertClickHandler);
+  errorButton.removeEventListener('click', alertClickHandler);
 }
 
 function debounce (callback, timeoutDelay = 500) {
@@ -82,4 +101,4 @@ function debounce (callback, timeoutDelay = 500) {
     // пока действие совершается чаще, чем переданная задержка timeoutDelay
   };
 }
-export {getRandomNumber, getArray, getRandomElem, showAlert, clickEvent, escEvent, debounce};
+export {getRandomNumber, getArray, getRandomElem, showAlert, successClickHandler, alertClickHandler, successKeydownHandler, alertKeydownHandler, debounce};
